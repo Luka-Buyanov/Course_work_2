@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Any
 
 import requests
 
@@ -8,7 +8,7 @@ class BaseClass(ABC):
     """Абстрактный класс для работы с API от hh.ru"""
 
     @abstractmethod
-    def get_vacancies(self, *args: Any, **kwargs: Any) -> Any:
+    def load_vacancies(self, *args: Any, **kwargs: Any) -> Any:
         """Метод реализующий вызов API и запрос вакансий"""
 
         pass
@@ -17,16 +17,15 @@ class BaseClass(ABC):
 class HH(BaseClass):
     """Класс получает информацию о вакансиях с сайта HeadHunter"""
 
-    def __init__(self, file_worker: str = "data/json_vacancies.json"):
+    def __init__(self) -> None:
         """Инициализатор класса"""
 
         self.__url = "https://api.hh.ru/vacancies"
         self.__headers = {"User-Agent": "HH-User-Agent"}
         self.__params = {"text": "", "page": 0, "per_page": 100}
         self.__vacancies = []  # конечный список, в который складываются вакансии list[dict]
-        super().__init__(file_worker)
 
-    def load_vacancies(self, name: str):
+    def load_vacancies(self, name: str) -> Any:
         """Метод загрузки данных вакансий из API сервиса"""
 
         self.__params["text"] = name
@@ -38,30 +37,28 @@ class HH(BaseClass):
 
         return self.__vacancies
 
-if __name__ == "__main__":
-    hh = HH(file_worker="../data/json_vacancies.json")
-    hh.load_vacancies("Разработчик")
 
-class Vacancy():
+class Vacancy:
     __list_vacancies: list = []
     __slots__ = ("__name", "__url", "__text", "__salary")
 
-    def __init__(self, name:str = "Нет значения", url:str = "Нет значения", salary:str|None|dict = "Нет значения", text: str = "Нет значения"):
+    def __init__(
+        self,
+        name: str = "Нет значения",
+        url: str = "Нет значения",
+        salary: str | None | dict = "Нет значения",
+        text: str = "Нет значения",
+    ):
         self.__name = name
         self.__url = url
         self.__salary = salary
         self.__text = text
 
-        vacancies = {
-            "name": self.__name,
-            "url": self.__url,
-            "salary": self.__salary,
-            "text": self.__text
-        }
+        vacancies = {"name": self.__name, "url": self.__url, "salary": self.__salary, "text": self.__text}
         self.__list_vacancies.append(vacancies)
 
     @staticmethod
-    def __validate(salary):
+    def __validate(salary) -> dict:
         """Метод валидации зарплаты"""
         if salary is None:
             return {"from": 0, "to": 0}
@@ -75,8 +72,8 @@ class Vacancy():
                 return {"from": 0, "to": 0}
         elif isinstance(salary, dict):
             # Убеждаемся, что ключи 'from' и 'to' присутствуют
-            from_salary = salary.get('from', 0)
-            to_salary = salary.get('to', 0)
+            from_salary = salary.get("from", 0)
+            to_salary = salary.get("to", 0)
             return {"from": from_salary, "to": to_salary}
         else:
             # Если тип данных неожиданный, возвращаем значения по умолчанию
@@ -88,7 +85,7 @@ class Vacancy():
         other_salary_to = other.__salary.get("to", 0)
         self_salary_from = self.__salary.get("from", 0)
         other_salary_from = other.__salary.get("from", 0)
-        return self_salary_to>=other_salary_to, self_salary_from>=other_salary_from
+        return self_salary_to >= other_salary_to, self_salary_from >= other_salary_from
 
     @classmethod
     def cast_to_object_list(cls, list_vacancies):
@@ -114,7 +111,7 @@ class Vacancy():
 
         for vacancy in cls.__list_vacancies:
             if vacancy["salary"].get("from", 0) >= from_salary and vacancy["salary"].get("to", 0) <= to_salary:
-                print (vacancy)
+                print(vacancy)
 
     @classmethod
     def list_of_vacancy(cls):
@@ -140,30 +137,3 @@ class Vacancy():
     @property
     def text(self):
         return self.__text
-
-
-if __name__ == "__main__":
-    Vacancy.clear_list()
-    vacancy_data_list = [
-        {
-            "name": "Python Developer",
-            "url": "https://hh.ru/vacancy/123456",
-            "salary": "100000 - 150000",
-            "text": "Требования: опыт работы от 3 лет..."
-        },
-        {
-            "name": "Senior Python Developer",
-            "url": "https://hh.ru/vacancy/654321",
-            "salary": "150000 - 200000",
-            "text": "Требования: опыт работы от 5 лет..."
-        },
-        {
-            "name": "Junior Python Developer",
-            "url": "https://hh.ru/vacancy/234567",
-            "salary": None,
-            "text": "Требования: опыт работы от 1 года..."
-        },
-    ]
-    Vacancy.cast_to_object_list(vacancy_data_list)
-    Vacancy.filter_salary(0, 150000)
-    print(Vacancy.list_of_vacancy())
