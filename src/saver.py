@@ -1,7 +1,7 @@
 import json
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from src.classes import Vacancy
 
@@ -41,7 +41,7 @@ class JSONSaver(VacancyStorage):
             print(f"Ошибка при чтении файла: {e}")  # Обработка других возможных ошибок
             return []  # Возвращаем пустой список
 
-    def _save_data(self, data: List[Dict]) -> None:
+    def _save_data(self, data: List[Any]) -> None:
         """Приватный метод для сохранения данных в JSON-файл."""
         try:
             with open(self.__file_path, "w", encoding="utf-8") as file:
@@ -53,7 +53,7 @@ class JSONSaver(VacancyStorage):
         """Добавляет список вакансий в JSON - файл, избегая дублирования."""
         data = self._load_data()
         for vacancy in vacancies:
-            vacancy_dict = vacancy  # Получаем словарь вакансии
+            vacancy_dict = vacancy.to_dict()  # Получаем словарь вакансии
             if vacancy_dict not in data:  # Проверяем, нет ли уже такой вакансии
                 data.append(vacancy_dict)  # Добавляем вакансию, если её нет в списке
         self._save_data(data)

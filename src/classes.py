@@ -87,6 +87,21 @@ class Vacancy:
         other_salary_from = other.__salary.get("from", 0)
         return self_salary_to >= other_salary_to, self_salary_from >= other_salary_from
 
+    def __ge__(self, other):
+        """Метод сравнения вакансий по зарплате (верхний порог)"""
+        self_salary_to = self.__salary.get("to", 0)
+        other_salary_to = other.__salary.get("to", 0)
+        return self_salary_to >= other_salary_to
+
+    def to_dict(self) -> Any:
+        """Преобразует экземпляр класса Vacancy в словарь"""
+        return {
+            "name": self.name,
+            "url": self.url,
+            "salary": self.salary,
+            "text": self.text,
+        }
+
     @classmethod
     def cast_to_object_list(cls, list_vacancies):
         """Метод добавления вакансий из списка вакансий"""
