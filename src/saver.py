@@ -53,7 +53,10 @@ class JSONSaver(VacancyStorage):
         """Добавляет список вакансий в JSON - файл, избегая дублирования."""
         data = self._load_data()
         for vacancy in vacancies:
-            vacancy_dict = vacancy.to_dict()  # Получаем словарь вакансии
+            if type(vacancy) == json:
+                vacancy_dict = vacancy
+            else:
+                vacancy_dict = vacancy.to_dict()
             if vacancy_dict not in data:  # Проверяем, нет ли уже такой вакансии
                 data.append(vacancy_dict)  # Добавляем вакансию, если её нет в списке
         self._save_data(data)
